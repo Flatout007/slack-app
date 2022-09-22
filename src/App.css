@@ -1,38 +1,50 @@
-.App {
-  text-align: center;
+@import url("https://use.typekit.net/dew1ayt.css");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-style: none;
+  font-family: lato, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+/**
+   * @STYLES FOR THE APP
+  */
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+html {
+  min-width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background-color: #F7F8FC;
+  overflow: hidden;
+  --slack-color: #350D36;
+  font-variant-ligatures: common-ligatures;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.46668;
 }
 
-.App-link {
-  color: #61dafb;
+.blue {
+  background-color: #0F64A3;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.slack-color-hover:hover {
+  background-color: var(--slack-color);
+  cursor: pointer;
+}
+
+.white-text {
+  color: white !important;
+}
+
+.show {
+  display:  block !important;
+  transition: 5s ease-in-out;
+}
+
+.dropdown {
+  transform: rotate(0deg) scale(1.35) !important;
+}
+
+.hide {
+  display: none;
 }

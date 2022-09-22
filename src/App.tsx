@@ -1,26 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Nav from './components/Nav';
+import Sidebar from './components/Sidebar';
+import Chat from "./components/Chat";
+import styled, { StyledComponent } from 'styled-components';
+import { ReactElement } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-function App() {
+function App(): ReactElement {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Nav></Nav>
+
+        <AppBody>
+          <Sidebar></Sidebar>
+
+          <Routes>
+            <Route path='/' element={<Chat></Chat>}></Route>
+          </Routes>
+        </AppBody>
+      </div>
+    </Router>
   );
 }
 
 export default App;
+
+const AppBody: StyledComponent<"div", any> = styled.div`
+  
+  
+ 
+`;
