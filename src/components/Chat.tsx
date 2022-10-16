@@ -5,89 +5,104 @@ import ChatInputBox from "./ChatInputBox";
 import { StarOutline, SvgIconComponent, InfoOutlined } from "@material-ui/icons"
 import { RootState } from "../app/store";
 import { useSelector } from "react-redux";
-import { useCollection, useDocument } from "react-firebase-hooks/firestore";
-import { roomCollection, roomMessageCollection } from "../firebase";
-import { doc, DocumentData, DocumentReference, onSnapshot, orderBy, Query, query, QuerySnapshot, where } from "firebase/firestore";
-import {firestore} from "../firebase";
-import { useEffect, useRef, useState } from "react";
-
+import { collection, doc, DocumentData, DocumentReference, getDoc, onSnapshot, orderBy, Query, query, QuerySnapshot, Timestamp } from "firebase/firestore";
+import { firestore } from "../firebase";
+import { ReactElement, SyntheticEvent, useEffect, useState } from "react";
+import { NothingToShow } from "./NothingToShow";
 
 export interface ChatProps {
 }
 
 export default function Chat(props: ChatProps) {
 
-    const arr = [];
     const roomId: string = useSelector(function (state: RootState): string {
         const { roomId } = state.channel;
-
         return roomId;
     });
-    let roomData: DocumentReference;
     const [messages, getMessages] = useState<Array<DocumentData>>([]);
-    /**
-     * @Todo
-     *  - Get the current room details based on the roomId stored in redux.
-     * 
-     *  - Get all of the room's messages based on the roomId. Order 
-     *    asc by timestamp.
-    */
+    const [room, getRoom] = useState<DocumentData | undefined>({});
+    const chatItems: ReactElement[] = messages.map(function (ele: DocumentData): ReactElement {
+        const { message, timestamp, user, userImage } = ele.data();
 
-    useEffect(function() {
+        return (<ChatItem user={user} photoURL={userImage} timestamp={handleTime(timestamp)} message={message}></ChatItem>);
+    });
+
+    useEffect(function (): void {
+
         if (roomId) {
-            const collection: Query = query(roomMessageCollection, where("id", "==", roomId));
 
-            onSnapshot(collection, function (snapshot: QuerySnapshot): void {
-                getMessages(snapshot.docs.map(function (ele: DocumentData) { return ele; }));
+            const q: Query = query(collection(firestore, "room", roomId, "messages"), orderBy("timestamp", "asc"));
+
+            const currentRoom: DocumentReference = doc(firestore, "room", roomId);
+
+            getDoc(currentRoom).then(function (data: DocumentData): void { getRoom(data.data()) });
+
+            onSnapshot(q, function (snap: QuerySnapshot): void {
+                getMessages(snap.docs.map(function (ele: DocumentData): DocumentData {
+                    return ele;
+                }));
             });
         }
-    }, []) 
+    }, [roomId]);
 
-    if(roomId) {
-        roomData = doc(firestore, "room", roomId);
-        console.log(roomData);
+    function scrollToBottomOnLoad(e: SyntheticEvent) {
+
+        e.currentTarget.scrollTo({
+            top: e.currentTarget.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
-    console.log(messages);
+    function handleTime(time: Timestamp): string {
 
+        const t: string[] = new Date(time?.seconds * 1000).toUTCString().split(" ");
+        let formattedTime: string[] = [];
 
-    for (let i = 0; i < 10; i++) {
-        arr.push(<ChatItem></ChatItem>);
+        for (let i: number = 0; i < t.length; i++) {
+            formattedTime[formattedTime.length] = t[i];
+        }
+
+        return formattedTime.slice(1).reverse().join(" ");
     }
 
-    // console.log("roomData => " && roomData, "messages => "+ messages);
+    if (messages && messages.length <= 0) {
+        return (<NothingToShow></NothingToShow>)
+    }
 
     return (
-        <ChatContainer>
+        <ChatContainer >
             <ChatHeader>
                 <ChatHeaderIconsLeft>
-                    <ChatHeaderStrong>#Room-Name</ChatHeaderStrong>
+                    <ChatHeaderStrong>#{room && room.name}</ChatHeaderStrong>
                     <Star></Star>
                 </ChatHeaderIconsLeft>
                 <ChatHeaderIconsRight>
                     <ChatHeaderH1>Details</ChatHeaderH1>
                     <Info></Info>
                 </ChatHeaderIconsRight>
-
             </ChatHeader>
-            <div style={{ marginTop: '10px', overflowY: 'scroll' }}>
-                {arr}
-            </div>
-            <ChatInputBox roomId={roomId}></ChatInputBox>
+
+            <ChatDiv onLoad={function (e: SyntheticEvent): void { scrollToBottomOnLoad(e) }}>
+
+                {chatItems}
+                
+            </ChatDiv>
+
+            <ChatInputBox roomName={room?.name} roomId={roomId}></ChatInputBox>
 
         </ChatContainer>
     );
 }
 
 const ChatContainer: StyledComponent<"div", any> = styled.div`
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
     height: 100vh;
-    width: 90vw;
-    margin-left: 16em;
 `;
 const ChatHeader: StyledComponent<"div", any> = styled.div`
     width: 100%;
-    height: 80px;
+    height: 4.72em;
     margin-top: 60px;
     display: flex;
     align-items: center;
@@ -123,4 +138,7 @@ const ChatHeaderH1: StyledComponent<"h1", any> = styled.h1`
 const Info: StyledComponent<SvgIconComponent, any> = styled(InfoOutlined)`
     margin-left: 10px;
 `;
-
+const ChatDiv: StyledComponent<"div", any> = styled.div`
+    height: 100vh;
+    overflow-y: scroll;
+`;

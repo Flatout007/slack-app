@@ -2,16 +2,25 @@ import { ReactElement } from "react";
 import styled, { StyledComponent } from "styled-components";
 
 export interface ChatItemProps {
+  message: string
+  timestamp: string
+  photoURL: string
+  user: string
 }
 
 export default function ChatItem(props: ChatItemProps): ReactElement {
+
+  console.log(props.photoURL);
+
   return (
     <ChatItemBox>
       <ChatItemContainer>
-        <ChatItemAvatar alt="default-icon" src="https://ca.slack-edge.com/T03GU501J-U01HM5NV3C5-g06adcd97a86-512"></ChatItemAvatar>
+
+        <ChatItemAvatar alt="default-icon" src={props.photoURL != null ? props.photoURL : "https://ca.slack-edge.com/T03GU501J-U01HM5NV3C5-g06adcd97a86-512"}></ChatItemAvatar>
+
         <ChatItemContents>
-          <ChatItemH1>Sender Name</ChatItemH1>
-          <ChatItemP>adbaaeruibuiervhencehberhbvervbyuebvuierbvuib berv</ChatItemP>
+          <ChatItemH1>{props.user}<ChatSpan>{props.timestamp}</ChatSpan></ChatItemH1>
+          <ChatItemP>{props.message}</ChatItemP>
         </ChatItemContents>
       </ChatItemContainer>
     </ChatItemBox>
@@ -24,8 +33,9 @@ const ChatItemBox: StyledComponent<"div", any> = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
-`
-
+  padding-top: 16px;
+  padding-bottom: 16px;
+`;
 const ChatItemContainer: StyledComponent<"div", any> = styled.div`
   height: 5.2em;
   width: 600px;
@@ -49,7 +59,14 @@ const ChatItemH1: StyledComponent<"h1", any> = styled.h1`
   font-size: 1.1rem;
 `;
 const ChatItemP: StyledComponent<"p", any> = styled.p`
-    width: 30em;
-    display: inline-block;
-    word-wrap: break-word;
+  width: 30em;
+  display: inline-block;
+  word-wrap: break-word;
 `;
+const ChatSpan: StyledComponent<"span", any> = styled.span`
+  margin-left: 10px;
+  font-size: 0.8rem;
+  color: gray;
+  letter-spacing: 0.5px;
+`;
+

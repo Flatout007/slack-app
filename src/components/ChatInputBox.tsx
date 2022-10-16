@@ -1,16 +1,19 @@
-import { FormEvent, ReactElement, SyntheticEvent, useRef } from "react";
 import styled, { StyledComponent } from "styled-components";
+import { FormEvent, ReactElement, SyntheticEvent, useRef } from "react";
 import { Button } from "@material-ui/core";
-import { firestore } from "../firebase";
+import { auth, firestore } from "../firebase";
 import { doc, serverTimestamp, addDoc, collection, DocumentReference } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export interface ChatInputBoxProps {
     roomId: string;
+    roomName: string;
 }
 
 export default function ChatInputBox(props: ChatInputBoxProps): ReactElement {
 
     const inputRef = useRef<HTMLInputElement>(null);
+    const [user] = useAuthState(auth);
 
     function sendMessageOnSubmit(e: SyntheticEvent): void {
 
@@ -23,17 +26,19 @@ export default function ChatInputBox(props: ChatInputBoxProps): ReactElement {
             addDoc(collection(roomReference, "messages"), {
                 message: inputRef.current?.value,
                 timestamp: serverTimestamp(),
-                user: "Sender User",
-                userImage: null
+                user: user?.displayName?.toString(),
+                userImage: user?.photoURL
             }).then(function (): void { alert("message sent") })
                 .catch(function (): void { alert("something went wrong") });
         }
+
+        inputRef!.current!.value = "";
     }
 
     return (
         <ChatFormContainer>
             <ChatForm onSubmit={function (e: FormEvent): void { sendMessageOnSubmit(e) }}>
-                <ChatInput ref={inputRef} placeholder="Message"></ChatInput>
+                <ChatInput ref={inputRef} placeholder={props.roomName ? `message #${props.roomName}` : "message"}></ChatInput>
                 <Button
                     style={{ display: 'none' }} hidden type="submit">
                     send
@@ -67,4 +72,5 @@ const ChatFormContainer: StyledComponent<"div", any> = styled.div`
       width: 100%;
       display: flex;
       align-items: center;
+      z-index: 200;
 `;

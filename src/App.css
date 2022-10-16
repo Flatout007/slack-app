@@ -15,7 +15,6 @@
 html {
   min-width: 100%;
   min-height: 100vh;
-  background-color: #F7F8FC;
   overflow: hidden;
   --slack-color: #350D36;
   font-variant-ligatures: common-ligatures;
@@ -37,7 +36,7 @@ html {
 }
 
 .show {
-  display:  block !important;
+  display: block !important;
   transition: 5s ease-in-out;
 }
 
@@ -47,4 +46,10 @@ html {
 
 .hide {
   display: none;
+}
+
+@keyframes spinner {
+  100% {
+    transform: rotate(360deg);
+  }
 }

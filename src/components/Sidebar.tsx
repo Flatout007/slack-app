@@ -1,11 +1,12 @@
 import "../App.css";
-import ChannelItem from "./Channelitem";
+import ChannelItem from "./ChannelItem";
 import styled, { StyledComponent } from "styled-components";
 import { ReactElement, useRef, SyntheticEvent } from "react";
 import { ArrowDropDownRounded, SvgIconComponent, AddRounded, FiberManualRecord } from "@material-ui/icons"
 import { addDoc, DocumentData } from "firebase/firestore";
-import { roomCollection } from "../firebase";
+import { auth, roomCollection } from "../firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Sidebar(): ReactElement {
 
@@ -14,7 +15,7 @@ export default function Sidebar(): ReactElement {
     const queue: Array<EventTarget & Element | HTMLLIElement | null> = [];
     let state: number = 0;
     let id: string;
-    const [collection, loading, error] = useCollection<DocumentData>(roomCollection);
+    const [collection] = useCollection<DocumentData>(roomCollection);
     const channelItems: ReactElement[] | undefined = collection?.docs.map(function (ele: DocumentData): ReactElement {
 
         const { name } = ele.data();
@@ -23,6 +24,7 @@ export default function Sidebar(): ReactElement {
         return (<ChannelItem key={`${id}`} id={`${id}`} title={name}></ChannelItem>);
     });
     const channelContainer = useRef<HTMLDivElement>(null);
+    const [user] = useAuthState(auth);
 
     function handleEnableBlueOnClick(e: SyntheticEvent): void {
 
@@ -106,7 +108,7 @@ export default function Sidebar(): ReactElement {
                     </svg>
                 </AsidePencilContainer>
                 <FiberRecord></FiberRecord>
-                <AsideDisplayName>Current User</AsideDisplayName>
+                <AsideDisplayName>{user?.displayName?.toString()}</AsideDisplayName>
             </AsideTitle>
 
             <AsideUL>
@@ -223,20 +225,18 @@ export default function Sidebar(): ReactElement {
 }
 
 const Aside: StyledComponent<"aside", any> = styled.aside`
-    height: 100em;
-    width: 16em;
+    min-width: 255px;
     background-color: #3F0E40;
     display: flex;
     flex-direction: column;
-    position: fixed;
 
     @media only screen and (min-width: 1400px) {
-        width: 18em;
+        width: 21em;
     }
 `;
 const AsideTitle: StyledComponent<"div", any> = styled.div`
-    width: 16em;
-    height: 5em;
+    width: 14.9em;
+    height: 4em;
     z-index: 100;
     margin-top: 56px;
     border-top: 2px solid #522653;
@@ -251,7 +251,7 @@ const AsideTitle: StyledComponent<"div", any> = styled.div`
 `;
 const AsideH1: StyledComponent<"h1", any> = styled.h1`
     width: 150px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     margin-left: 12px;
     padding-left: 5px;
     padding-right: 5px;
@@ -259,6 +259,7 @@ const AsideH1: StyledComponent<"h1", any> = styled.h1`
     text-overflow: ellipsis;
     overflow: hidden;
     color: white;
+    margin-bottom: 10px;
 `;
 const AsidePencilContainer: StyledComponent<"div", any> = styled.div`
     display: flex;
@@ -371,14 +372,14 @@ const AsideAddIcon: StyledComponent<SvgIconComponent, any> = styled(AddRounded)`
 `;
 const AsideDisplayName: StyledComponent<"p", any> = styled.p`
     position: absolute;
-    margin-top: 50px;
+    margin-top: 40px;
     margin-left: 40px;
     color: white;
     font-size: 0.9rem;
 `;
 const FiberRecord: StyledComponent<SvgIconComponent, any> = styled(FiberManualRecord)`
     position: absolute;
-    margin-top: 50px;
+    margin-top: 40px;
     margin-left: 12px;
     color: green;
 `;

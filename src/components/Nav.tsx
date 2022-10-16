@@ -1,15 +1,26 @@
-import { ReactElement } from "react";
+import { ReactElement, SyntheticEvent } from "react";
 import styled, { StyledComponent } from "styled-components";
 import { Avatar, AvatarTypeMap } from "@mui/material";
 import { OverridableComponent } from "@mui/material/OverridableComponent";
 import { AccessTime, SvgIconComponent, HelpOutlineRounded, SearchOutlined } from "@material-ui/icons"
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase";
 
 export default function Nav(): ReactElement {
+
+    const [user] = useAuthState(auth);
+
+    function signOut() {
+        auth.signOut().then(function(): void {alert("you have signed out")});
+    }
+
     return (
         <HeaderNav>
 
             <NavLeft>
-                <NavAvatar></NavAvatar>
+                {user?.photoURL ? (<NavAvatar onClick={function(): void {signOut()}}
+                alt={`${user.displayName}`} src={user?.photoURL}></NavAvatar>) :
+                    (<NavDefaultAvatar onClick={function(): void {signOut()}}></NavDefaultAvatar>)}
                 <NavAccessTime></NavAccessTime>
             </NavLeft>
 
@@ -54,8 +65,18 @@ const NavRight: StyledComponent<"div", any> = styled.div`
     justify-content: flex-end;
     align-items: center;
 `;
-const NavAvatar: StyledComponent<OverridableComponent<AvatarTypeMap<{}, "div">>, any> = styled(Avatar)`
+const NavDefaultAvatar: StyledComponent<OverridableComponent<AvatarTypeMap<{}, "div">>, any> = styled(Avatar)`
     cursor: pointer;
+    
+    &:hover {
+        filter: brightness(105%);
+    }
+`;
+const NavAvatar: StyledComponent<"img", any> = styled.img`
+    cursor: pointer;
+    border-radius: 100%;
+    width: 2.5em;
+    height: 2.5em;
     
     &:hover {
         filter: brightness(105%);
